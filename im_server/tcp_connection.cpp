@@ -79,8 +79,13 @@ void tcp_connection::handle_read(const boost::system::error_code& error,
     finish();
     return;
   }
+  std::stringstream stream;
+  boost::posix_time::time_facet* facet = new boost::posix_time::time_facet();
+  facet->format("%H:%M:%S");
+  stream.imbue(std::locale(std::locale::classic(), facet));
   boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
-  std::string message = to_simple_string(now) + " " + user_name_ + ": " +
+  stream << now;
+  std::string message = "[" + stream.str() + "]" + " " + user_name_ + ": " +
                         std::string(buf_.data()).substr(0, bytes_transferred);
   server_->send_all_users(message, user_id_);
   start_read();
